@@ -19,10 +19,31 @@ class testgen(QtWidgets.QMainWindow, mainform.Ui_MainWindow):
         self.setupUi(self)
         self.action_load_file.triggered.connect(self.open_file_dialog)
         self.action_testgen.triggered.connect(self.gen)
+        self.action_loadheader.triggered.connect(self.loadHeader)
+        self.action_loadfooter.triggered.connect(self.loadFooter)
         self.radioButton_1col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_1col))
         self.radioButton_2col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_2col))
         self.spinBox.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
         self.spinBox_2.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
+
+    def read_docx_file(self, file_path):
+        document = docx.Document(file_path)
+        text = []
+        for paragraph in document.paragraphs:
+            text.append(paragraph.text)
+        return '\n'.join(text)
+
+    def loadHeader(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
+        if file_path:
+            content = self.read_docx_file(file_path)
+            self.textBrowser.setText(content)
+    
+    def loadFooter(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
+        if file_path:
+            content = self.read_docx_file(file_path)
+            self.textBrowser_2.setText(content)
 
     def on_radio_button_clicked(self, rbtn):
         global text_col #количество колонок в тесте
