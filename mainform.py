@@ -9,12 +9,12 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QRadioButton, QButtonGroup
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(2000, 800)
+        MainWindow.resize(2000, 1200)
         MainWindow.setBaseSize(QtCore.QSize(2000, 800))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -26,72 +26,103 @@ class Ui_MainWindow(object):
 
         self.btn_loadfile = QtWidgets.QPushButton(self.centralwidget)
         self.btn_loadfile.setGeometry(QtCore.QRect(10, 450, 330, 100))
-        self.btn_loadfile.setObjectName("btn_loadfile")
-        font = self.btn_loadfile.font()  
-        font.setPointSize(12)  
+        font = QtGui.QFont()
+        font.setPointSize(12)
         self.btn_loadfile.setFont(font)
+        self.btn_loadfile.setObjectName("btn_loadfile")
 
         self.btn_testgen = QtWidgets.QPushButton(self.centralwidget)
-        self.btn_testgen.setGeometry(QtCore.QRect(10, 600, 330, 100))
-        self.btn_testgen.setObjectName("btn_testgen")
-        self.btn_testgen.setEnabled(False)
-        font = self.btn_testgen.font()  
-        font.setPointSize(12)  
+        self.btn_testgen.setGeometry(QtCore.QRect(10, 1010, 330, 100))
+        font = QtGui.QFont()
+        font.setPointSize(12)
         self.btn_testgen.setFont(font)
+        self.btn_testgen.setObjectName("btn_testgen")
 
         self.spinBox = QtWidgets.QSpinBox(self.centralwidget)
-        self.spinBox.setGeometry(QtCore.QRect(750, 450, 100, 100))
+        self.spinBox.setGeometry(QtCore.QRect(380, 560, 100, 100))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.spinBox.setFont(font)
         self.spinBox.setObjectName("spinBox")
-        font = self.spinBox.font()  
-        font.setPointSize(12)  
-        self.spinBox.setFont(font)  
-
+        
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(380, 470, 350, 50))
+        self.label.setGeometry(QtCore.QRect(10, 580, 350, 50))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label.setFont(font)
         self.label.setObjectName("label")
-        font = self.label.font()  
-        font.setPointSize(12)  
-        self.label.setFont(font)  
 
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(380, 630, 350, 50))
+        self.label_2.setGeometry(QtCore.QRect(10, 680, 350, 50))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
-        font = self.label_2.font()  
-        font.setPointSize(12)  
-        self.label_2.setFont(font)  
 
         self.spinBox_2 = QtWidgets.QSpinBox(self.centralwidget)
-        self.spinBox_2.setGeometry(QtCore.QRect(750, 600, 100, 100))
+        self.spinBox_2.setGeometry(QtCore.QRect(380, 660, 100, 100))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.spinBox_2.setFont(font)
         self.spinBox_2.setObjectName("spinBox_2")
-        font = self.spinBox_2.font()  
-        font.setPointSize(12)  
-        self.spinBox_2.setFont(font)  
 
         self.groupBox_col = QtWidgets.QGroupBox(self.centralwidget)
-        self.groupBox_col.setGeometry(QtCore.QRect(950, 450, 300, 200))
+        self.groupBox_col.setGeometry(QtCore.QRect(10, 820, 350, 170))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.groupBox_col.setFont(font)
         self.groupBox_col.setObjectName("groupBox_col")
-        font = self.groupBox_col.font()  
-        font.setPointSize(10)  
-        self.groupBox_col.setFont(font)  
-
 
         self.radioButton_1col = QtWidgets.QRadioButton(self.groupBox_col)
         self.radioButton_1col.setGeometry(QtCore.QRect(20, 40, 250, 30))
         self.radioButton_1col.setObjectName("radioButton_1col")
-        font = self.radioButton_1col.font()  
-        font.setPointSize(12)  
-        self.radioButton_1col.setFont(font)  
-
         self.radioButton_2col = QtWidgets.QRadioButton(self.groupBox_col)
-        self.radioButton_2col.setGeometry(QtCore.QRect(20, 80, 250, 30))
+        self.radioButton_2col.setGeometry(QtCore.QRect(20, 100, 250, 30))
         self.radioButton_2col.setObjectName("radioButton_2col")
-        font = self.radioButton_2col.font()  
-        font.setPointSize(12)  
-        self.radioButton_2col.setFont(font)  
 
-        self.button_group = QButtonGroup()
-        self.button_group.addButton(self.radioButton_1col, 1)
-        self.button_group.addButton(self.radioButton_2col, 2)
+        self.headergroup = QtWidgets.QGroupBox(self.centralwidget)
+        self.headergroup.setGeometry(QtCore.QRect(620, 430, 931, 361))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.headergroup.setFont(font)
+        self.headergroup.setObjectName("headergroup")
+
+        self.textBrowser = QtWidgets.QTextBrowser(self.headergroup)
+        self.textBrowser.setGeometry(QtCore.QRect(10, 130, 911, 221))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.textBrowser.setFont(font)
+        self.textBrowser.setObjectName("headerBrowser")
+
+        self.btn_loadheader = QtWidgets.QPushButton(self.headergroup)
+        self.btn_loadheader.setGeometry(QtCore.QRect(340, 30, 300, 75))
+        self.btn_loadheader.setObjectName("btn_loadheader")
+
+        self.isHeader = QtWidgets.QCheckBox(self.headergroup)
+        self.isHeader.setGeometry(QtCore.QRect(20, 80, 250, 31))
+        self.isHeader.setObjectName("isHeader")
+
+        self.footergroup = QtWidgets.QGroupBox(self.centralwidget)
+        self.footergroup.setGeometry(QtCore.QRect(620, 800, 931, 361))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.footergroup.setFont(font)
+        self.footergroup.setObjectName("footergroup")
+
+        self.isFooter = QtWidgets.QCheckBox(self.footergroup)
+        self.isFooter.setGeometry(QtCore.QRect(20, 50, 250, 41))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.isFooter.setFont(font)
+        self.isFooter.setObjectName("isFooter")
+
+        self.textBrowser_2 = QtWidgets.QTextBrowser(self.footergroup)
+        self.textBrowser_2.setGeometry(QtCore.QRect(10, 130, 911, 221))
+        self.textBrowser_2.setObjectName("footerBrowser")
+
+        self.btn_loadfooter = QtWidgets.QPushButton(self.footergroup)
+        self.btn_loadfooter.setGeometry(QtCore.QRect(340, 30, 300, 75))
+        self.btn_loadfooter.setObjectName("btn_loadfooter")
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -105,10 +136,16 @@ class Ui_MainWindow(object):
         self.action_load_file.setObjectName("action_load_file")
         self.action_testgen = QtWidgets.QAction(MainWindow)
         self.action_testgen.setObjectName("action_testgen")
+        self.action_loadheader = QtWidgets.QAction(MainWindow)
+        self.action_loadheader.setObjectName("action_loadheader")
+        self.action_loadfooter = QtWidgets.QAction(MainWindow)
+        self.action_loadfooter.setObjectName("action_loadfooter")
 
         self.retranslateUi(MainWindow)
         self.btn_loadfile.clicked.connect(self.action_load_file.trigger) # type: ignore
         self.btn_testgen.clicked.connect(self.action_testgen.trigger) # type: ignore
+        self.btn_loadheader.clicked.connect(self.action_loadheader.trigger) # type: ignore
+        self.btn_loadfooter.clicked.connect(self.action_loadfooter.trigger) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -121,8 +158,16 @@ class Ui_MainWindow(object):
         self.groupBox_col.setTitle(_translate("MainWindow", "Количество колонок"))
         self.radioButton_1col.setText(_translate("MainWindow", "1 колонка"))
         self.radioButton_2col.setText(_translate("MainWindow", "2 колонки"))
+        self.headergroup.setTitle(_translate("MainWindow", "Шапка теста"))
+        self.btn_loadheader.setText(_translate("MainWindow", "Файл шапки"))
+        self.isHeader.setText(_translate("MainWindow", "Шапка теста"))
+        self.footergroup.setTitle(_translate("MainWindow", "Футер"))
+        self.isFooter.setText(_translate("MainWindow", "Футер теста"))
+        self.btn_loadfooter.setText(_translate("MainWindow", "Из файла"))
         self.action_load_file.setText(_translate("MainWindow", "load_file"))
         self.action_testgen.setText(_translate("MainWindow", "testgen"))
+        self.action_loadheader.setText(_translate("MainWindow", "loadheader"))
+        self.action_loadfooter.setText(_translate("MainWindow", "loadfooter"))
 
 
 if __name__ == "__main__":
