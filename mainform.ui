@@ -159,7 +159,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>1 колонка</string>
+      <string>1</string>
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_2col">
@@ -172,7 +172,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>2 колонки</string>
+      <string>2</string>
      </property>
     </widget>
    </widget>

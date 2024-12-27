@@ -5,14 +5,14 @@ import pandas as pd
 import sys  
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
-import mainform
+import mainform_
 import random
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 #from docx.enum import WD_LIST_NUMBERING
 
-class testgen(QtWidgets.QMainWindow, mainform.Ui_MainWindow):
+class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
     
     def __init__(self):
         super().__init__()
@@ -35,20 +35,23 @@ class testgen(QtWidgets.QMainWindow, mainform.Ui_MainWindow):
 
     def loadHeader(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
+        global header_content
         if file_path:
-            content = self.read_docx_file(file_path)
-            self.textBrowser.setText(content)
+            header_content = self.read_docx_file(file_path)
+            self.textBrowser.setText(header_content)
     
     def loadFooter(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
+        global footer_content
         if file_path:
-            content = self.read_docx_file(file_path)
-            self.textBrowser_2.setText(content)
+            footer_content = self.read_docx_file(file_path)
+            self.textBrowser_2.setText(footer_content)
 
     def on_radio_button_clicked(self, rbtn):
         global text_col #количество колонок в тесте
         if rbtn.isChecked():
-            text_col = self.button_group.id(rbtn)
+            text_col = int(rbtn.text())
+            
 
     def checkValue(self, spin1, spin2):
         if (spin1.value() == 0 or spin2.value() == 0):
@@ -96,26 +99,30 @@ class testgen(QtWidgets.QMainWindow, mainform.Ui_MainWindow):
     def gen(self):
         LEFT_INDENT = Pt(36)
         outfile_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*)")
-        
+              
         if outfile_path:
             doc = docx.Document()
             # задаем стиль текста по умолчанию
             style = doc.styles['Normal']
-            # название шрифта
             style.font.name = 'Arial'
-            # размер шрифта
             style.font.size = Pt(14)
+           
             test_count = self.spinBox.value()
             question_count = self.spinBox_2.value()
             list_keys= []
             if (test_count != 0 and question_count != 0):
                 for test in range(test_count):
+                    doc.add_section(WD_SECTION.NEW_PAGE)
                     section = doc.sections[0]
-                    sectPr = section._sectPr
+                    sectPr = section._sectPr 
                     cols = sectPr.xpath('./w:cols')[0]
                     cols.set(qn('w:num'), '1')
-                    var = doc.add_paragraph('Вариант '+str(test+1), style)
-                    var.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    if self.headergroup.isChecked():
+                        head = doc.add_paragraph(header_content)
+                    doc.add_paragraph('Вариант '+str(test+1))
+                    head.style = style
+                    head.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                                       
                     doc.add_section(WD_SECTION.CONTINUOUS)
                     #колонки
                     section1 = doc.sections[1]
@@ -137,15 +144,22 @@ class testgen(QtWidgets.QMainWindow, mainform.Ui_MainWindow):
                         style1.font.size =Pt(11)
                         for i in range(2,6):
                             if (pd.isna(item[i]) != True):
-                               
                                 par =doc.add_paragraph(f'{i-1}. '+ item[i])
-                                
                                 par.paragraph_format.left_indent = LEFT_INDENT
                         
                         list_ques.insert(ques, item[6])
                         
                         doc.add_paragraph('________________________________')
-                        
+
+                    sectionf = doc.add_section(WD_SECTION.CONTINUOUS)
+                    sectionf = doc.sections[2]
+                    sectPr = sectionf._sectPr
+                    cols = sectPr.xpath('./w:cols')[0]
+                    cols.set(qn('w:num'), '1')
+                    if self.footergroup.isChecked():
+                        foot = doc.add_paragraph(footer_content)
+                        foot.style = style
+                   
                     list_keys.insert(test, list_ques)
                     doc.add_page_break()
                 # Добавление таблицы

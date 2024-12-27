@@ -76,6 +76,7 @@ class Ui_MainWindow(object):
         self.radioButton_1col = QtWidgets.QRadioButton(self.groupBox_col)
         self.radioButton_1col.setGeometry(QtCore.QRect(20, 40, 250, 30))
         self.radioButton_1col.setObjectName("radioButton_1col")
+        
         self.radioButton_2col = QtWidgets.QRadioButton(self.groupBox_col)
         self.radioButton_2col.setGeometry(QtCore.QRect(20, 100, 250, 30))
         self.radioButton_2col.setObjectName("radioButton_2col")
@@ -86,6 +87,8 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.headergroup.setFont(font)
         self.headergroup.setObjectName("headergroup")
+        self.headergroup.setCheckable(True)
+        self.headergroup.setChecked(True)
 
         self.textBrowser = QtWidgets.QTextBrowser(self.headergroup)
         self.textBrowser.setGeometry(QtCore.QRect(10, 130, 911, 221))
@@ -98,23 +101,14 @@ class Ui_MainWindow(object):
         self.btn_loadheader.setGeometry(QtCore.QRect(340, 30, 300, 75))
         self.btn_loadheader.setObjectName("btn_loadheader")
 
-        self.isHeader = QtWidgets.QCheckBox(self.headergroup)
-        self.isHeader.setGeometry(QtCore.QRect(20, 80, 250, 31))
-        self.isHeader.setObjectName("isHeader")
-
         self.footergroup = QtWidgets.QGroupBox(self.centralwidget)
         self.footergroup.setGeometry(QtCore.QRect(620, 800, 931, 361))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.footergroup.setFont(font)
         self.footergroup.setObjectName("footergroup")
-
-        self.isFooter = QtWidgets.QCheckBox(self.footergroup)
-        self.isFooter.setGeometry(QtCore.QRect(20, 50, 250, 41))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.isFooter.setFont(font)
-        self.isFooter.setObjectName("isFooter")
+        self.footergroup.setCheckable(True)
+        self.footergroup.setChecked(True)
 
         self.textBrowser_2 = QtWidgets.QTextBrowser(self.footergroup)
         self.textBrowser_2.setGeometry(QtCore.QRect(10, 130, 911, 221))
@@ -160,9 +154,9 @@ class Ui_MainWindow(object):
         self.radioButton_2col.setText(_translate("MainWindow", "2 колонки"))
         self.headergroup.setTitle(_translate("MainWindow", "Шапка теста"))
         self.btn_loadheader.setText(_translate("MainWindow", "Файл шапки"))
-        self.isHeader.setText(_translate("MainWindow", "Шапка теста"))
+       
         self.footergroup.setTitle(_translate("MainWindow", "Футер"))
-        self.isFooter.setText(_translate("MainWindow", "Футер теста"))
+       
         self.btn_loadfooter.setText(_translate("MainWindow", "Из файла"))
         self.action_load_file.setText(_translate("MainWindow", "load_file"))
         self.action_testgen.setText(_translate("MainWindow", "testgen"))
