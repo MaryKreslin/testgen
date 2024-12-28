@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
 import mainform_
 import random
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 #from docx.enum import WD_LIST_NUMBERING
@@ -92,62 +93,56 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         else:
             QtWidgets.QMessageBox.critical(self, 'Error', 'Ошибка чтения файла', QtWidgets.QMessageBox.Yes)
 
-    def add_header_section(self, doc, test):
-        style = doc.styles['Normal']
-        style.font.name = 'Arial'
-        style.font.size = Pt(10)
+    def add_header_section(self, doc, test, style):
         section = doc.sections[0]
         section.start_type = WD_SECTION.NEW_PAGE
         sectPr = section._sectPr 
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'), '1')
         if self.headergroup.isChecked():
-            head = doc.add_paragraph(header_content).style = style
-        head=doc.add_paragraph('Вариант '+str(test+1)).style = style
-        #head.style = style
-        #head.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
+            head = doc.add_paragraph(header_content, style = style)
+        head=doc.add_paragraph('Вариант '+str(test+1), style = style)
+        
     def add_main_section(self, doc, style, test):
         LEFT_INDENT = Pt(36)
-        doc.add_section(WD_SECTION.CONTINUOUS)
-        #колонки
-        section1 = doc.sections[1]
-        sectPr = section1._sectPr
-        cols = sectPr.xpath('./w:cols')[0]
-        cols.set(qn('w:num'), str(text_col))
-        cols.set(qn('w:space'), '10')  # Set space between columns to 10 points ->0.01"
+        
 
-        global list_ques
-        list_ques = []
-        for ques in range(question_count):
-            n = random.randint(1, row_count-1)
-            ques_text = doc.add_paragraph('Вопрос №' + str(ques+1))
-            ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-            item = list(dict_list[n].values())
-                       
-            doc.add_paragraph(item[1], style)
-            style1 = doc.styles['Normal']
-            style1.font.size =Pt(11)
-            for i in range(2,6):
-                if (pd.isna(item[i]) != True):
-                    par =doc.add_paragraph(f'{i-1}. '+ item[i])
-                    par.paragraph_format.left_indent =LEFT_INDENT
-                        
-                list_ques.insert(ques, item[6])
-                doc.add_paragraph('________________________________')
-            #list_keys.insert(test, list_ques)
-
-    def add_footer_section(self, doc, style):
+    def add_footer_section(self, doc):
+        style = doc.styles['Normal']
+        style.font.name = 'Arial'
+        style.font.size = Pt(10)
         sectionf = doc.add_section(WD_SECTION.CONTINUOUS)
         sectionf = doc.sections[2]
         sectPr = sectionf._sectPr
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'), '1')
         if self.footergroup.isChecked():
-            foot = doc.add_paragraph(footer_content)
-            foot.style = style
-        
+            foot = doc.add_paragraph(footer_content).style = style
+            #foot.style = style
+
+    def add_keys_table(self, doc, question_count, list_keys):
+        # добавляем таблицу с одной строкой для заполнения названий колонок
+        table = doc.add_table(1, question_count+1)
+        table.style = 'Table Grid'
+        # Получаем строку с колонками из добавленной таблицы 
+        head_cells = table.rows[0].cells
+        #print(list_keys)
+        # добавляем названия колонок
+        p = head_cells[0].paragraphs[0]
+        p.add_run(f'Вариант').bold = True
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        for i in range(1, question_count+1):
+            #print(i)
+            p = head_cells[i].paragraphs[0]
+            p.add_run(f'Вопрос {i}').bold = True
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for row in range(len(list_keys)):
+            cells = table.add_row().cells
+            cells[0].text = f'Вариант {row+1}'
+            for col in range(1,len(list_keys[row])+1):
+                cells[col].text = str(list_keys[row][col-1])
+
     def gen(self):
         LEFT_INDENT = Pt(36)
         outfile_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*)")
@@ -158,16 +153,21 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             style = doc.styles['Normal']
             style.font.name = 'Arial'
             style.font.size = Pt(14)
-           
+            #стиль для шапки
+            styleH = doc.styles.add_style('MyHeaderStyle', WD_STYLE_TYPE.PARAGRAPH)
+            styleH.font.name = 'Arial'
+            styleH.font.size = Pt(12)
+            #styleH.font.underline = True
+            styleH.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            #_______________________________
             test_count = self.spinBox.value()
             question_count = self.spinBox_2.value()
             list_keys= []
             if (test_count != 0 and question_count != 0):
                 for test in range(test_count):
-                    self.add_header_section( doc, test)
+                    self.add_header_section( doc, test, styleH)
                                       
                     doc.add_section(WD_SECTION.CONTINUOUS)
-                    #колонки
                     section1 = doc.sections[1]
                     sectPr = section1._sectPr
                     cols = sectPr.xpath('./w:cols')[0]
@@ -193,36 +193,19 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                         list_ques.insert(ques, item[6])
                         
                         doc.add_paragraph('________________________________')
-                    self.add_footer_section(doc, style)
+                    self.add_footer_section(doc)
                                       
                     list_keys.insert(test, list_ques)
                     doc.add_page_break()
                 # Добавление таблицы
-                # добавляем таблицу с одной строкой для заполнения названий колонок
-                table = doc.add_table(1, question_count+1)
-                table.style = 'Table Grid'
-                # Получаем строку с колонками из добавленной таблицы 
-                head_cells = table.rows[0].cells
-                #print(list_keys)
-                # добавляем названия колонок
-                p = head_cells[0].paragraphs[0]
-                p.add_run(f'Вариант').bold = True
-                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-                for i in range(1, question_count+1):
-                    #print(i)
-                    p = head_cells[i].paragraphs[0]
-                    p.add_run(f'Вопрос {i}').bold = True
-                    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                for row in range(len(list_keys)):
-                    cells = table.add_row().cells
-                    cells[0].text = f'Вариант {row+1}'
-                    for col in range(1,len(list_keys[row])+1):
-                        cells[col].text = str(list_keys[row][col-1])
+                self.add_keys_table(doc, question_count, list_keys)
+                
             elif (test_count == 0 or question_count == 0):
                 self.btn_testgen.setEnabled(False)     
                                                         
             doc.save(outfile_path)
+            doc.styles['MyHeaderStyle'].delete()
+            
             QtWidgets.QMessageBox.information(self, 'Information', 'Файл сформирован', QtWidgets.QMessageBox.Yes)
         else: QtWidgets.QMessageBox.critical(self, 'Error', 'Ошибка чтения файла', QtWidgets.QMessageBox.Yes)
      
