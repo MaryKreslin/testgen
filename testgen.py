@@ -156,19 +156,26 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             #стиль для шапки
             styleH = doc.styles.add_style('MyHeaderStyle', WD_STYLE_TYPE.PARAGRAPH)
             styleH.font.name = 'Arial'
-            styleH.font.size = Pt(12)
+            styleH.font.size = Pt(10)
             #styleH.font.underline = True
             styleH.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            #_______________________________
+            #стиль теста
+            style_main = doc.styles.add_style('mainStyle', WD_STYLE_TYPE.PARAGRAPH)
+            style_main.font.name = 'Arial'
+            style_main.font.size = Pt(12)
+            style_main.paragraph_format.algnment = WD_ALIGN_PARAGRAPH.JUSTIFY
             #_______________________________
             test_count = self.spinBox.value()
             question_count = self.spinBox_2.value()
             list_keys= []
             if (test_count != 0 and question_count != 0):
+                
                 for test in range(test_count):
                     self.add_header_section( doc, test, styleH)
-                                      
+                    section_number = test+1                  
                     doc.add_section(WD_SECTION.CONTINUOUS)
-                    section1 = doc.sections[1]
+                    section1 = doc.sections[section_number]
                     sectPr = section1._sectPr
                     cols = sectPr.xpath('./w:cols')[0]
                     cols.set(qn('w:num'), str(text_col))
@@ -177,24 +184,21 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     list_ques = []
                     for ques in range(question_count):
                         n = random.randint(1, row_count-1)
-                        ques_text = doc.add_paragraph('Вопрос №' + str(ques+1))
+                        ques_text = doc.add_paragraph('Вопрос №' + str(ques+1), style=style_main)
                         ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
                         item = list(dict_list[n].values())
                        
-                        doc.add_paragraph(item[1], style)
-                        style1 = doc.styles['Normal']
-                        style1.font.size =Pt(11)
+                        doc.add_paragraph(item[1], style=style_main)
                         for i in range(2,6):
                             if (pd.isna(item[i]) != True):
-                                par =doc.add_paragraph(f'{i-1}. '+ item[i])
-                                par.paragraph_format.left_indent = LEFT_INDENT
-                        
+                                par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
+                                                        
                         list_ques.insert(ques, item[6])
                         
                         doc.add_paragraph('________________________________')
                     self.add_footer_section(doc)
-                                      
+                    section_number= section_number+1                  
                     list_keys.insert(test, list_ques)
                     doc.add_page_break()
                 # Добавление таблицы
@@ -205,6 +209,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                                                         
             doc.save(outfile_path)
             doc.styles['MyHeaderStyle'].delete()
+            doc.styles['mainStyle'].delete()
             
             QtWidgets.QMessageBox.information(self, 'Information', 'Файл сформирован', QtWidgets.QMessageBox.Yes)
         else: QtWidgets.QMessageBox.critical(self, 'Error', 'Ошибка чтения файла', QtWidgets.QMessageBox.Yes)
