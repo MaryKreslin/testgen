@@ -37,6 +37,7 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.btn_testgen.setFont(font)
         self.btn_testgen.setObjectName("btn_testgen")
+        self.btn_testgen.setEnabled(False)
 
         self.spinBox = QtWidgets.QSpinBox(self.centralwidget)
         self.spinBox.setGeometry(QtCore.QRect(380, 560, 100, 100))
