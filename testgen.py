@@ -94,11 +94,13 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             QtWidgets.QMessageBox.critical(self, 'Error', 'Ошибка чтения файла', QtWidgets.QMessageBox.Yes)
 
     def add_header_section(self, doc, test, style):
-        section = doc.sections[0]
-        section.start_type = WD_SECTION.NEW_PAGE
-        sectPr = section._sectPr 
+        sectionH = doc.sections[0]
+        
+        sectionH.start_type = WD_SECTION.NEW_PAGE
+        sectPr = sectionH._sectPr 
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'), '1')
+        
         if self.headergroup.isChecked():
             head = doc.add_paragraph(header_content, style = style)
         head=doc.add_paragraph('Вариант '+str(test+1), style = style)
@@ -112,13 +114,15 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         style.font.name = 'Arial'
         style.font.size = Pt(10)
         sectionf = doc.add_section(WD_SECTION.CONTINUOUS)
-        sectionf = doc.sections[2]
+        sectionf = doc.sections[-1]
         sectPr = sectionf._sectPr
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'), '1')
         if self.footergroup.isChecked():
             foot = doc.add_paragraph(footer_content).style = style
             #foot.style = style
+        doc.add_section(WD_SECTION.NEW_PAGE)
+        #doc.add_page_break()
 
     def add_keys_table(self, doc, question_count, list_keys):
         # добавляем таблицу с одной строкой для заполнения названий колонок
@@ -173,13 +177,14 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                 
                 for test in range(test_count):
                     self.add_header_section( doc, test, styleH)
-                    section_number = test+1                  
+                                   
                     doc.add_section(WD_SECTION.CONTINUOUS)
-                    section1 = doc.sections[section_number]
+                    
+                    section1 = doc.sections[-1]
                     sectPr = section1._sectPr
                     cols = sectPr.xpath('./w:cols')[0]
                     cols.set(qn('w:num'), str(text_col))
-                    cols.set(qn('w:space'), '10')  # Set space between columns to 10 points ->0.01"
+                    cols.set(qn('w:space'), '10')  
 
                     list_ques = []
                     for ques in range(question_count):
@@ -188,7 +193,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                         ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
                         item = list(dict_list[n].values())
-                       
+                        
                         doc.add_paragraph(item[1], style=style_main)
                         for i in range(2,6):
                             if (pd.isna(item[i]) != True):
@@ -197,10 +202,12 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                         list_ques.insert(ques, item[6])
                         
                         doc.add_paragraph('________________________________')
+
                     self.add_footer_section(doc)
-                    section_number= section_number+1                  
+                    #doc.add_section(WD_SECTION.NEW_PAGE)
+
                     list_keys.insert(test, list_ques)
-                    doc.add_page_break()
+                    #doc.add_page_break()
                 # Добавление таблицы
                 self.add_keys_table(doc, question_count, list_keys)
                 
