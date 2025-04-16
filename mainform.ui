@@ -51,8 +51,8 @@
    <widget class="QPushButton" name="btn_testgen">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>1010</y>
+      <x>10</x>
+      <y>1330</y>
       <width>330</width>
       <height>100</height>
      </rect>
@@ -193,6 +193,9 @@
     <property name="title">
      <string>Шапка теста</string>
     </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
     <widget class="QTextBrowser" name="textBrowser">
      <property name="geometry">
       <rect>
@@ -221,19 +224,6 @@
       <string>Файл шапки</string>
      </property>
     </widget>
-    <widget class="QCheckBox" name="isHeader">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>80</y>
-       <width>171</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Шапка теста</string>
-     </property>
-    </widget>
    </widget>
    <widget class="QGroupBox" name="footergroup">
     <property name="geometry">
@@ -252,24 +242,9 @@
     <property name="title">
      <string>Футер</string>
     </property>
-    <widget class="QCheckBox" name="isFooter">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>50</y>
-       <width>211</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Футер теста</string>
-     </property>
-    </widget>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
     <widget class="QTextBrowser" name="textBrowser_2">
      <property name="geometry">
       <rect>
@@ -294,6 +269,22 @@
      </property>
     </widget>
    </widget>
+   <widget class="QGroupBox" name="themesgroupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>990</y>
+      <width>301</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Разбивка по темам</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -301,7 +292,7 @@
      <x>0</x>
      <y>0</y>
      <width>2000</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -324,6 +315,11 @@
   <action name="action_loadfooter">
    <property name="text">
     <string>loadfooter</string>
+   </property>
+  </action>
+  <action name="actionload_themes">
+   <property name="text">
+    <string>load_themes</string>
    </property>
   </action>
  </widget>
@@ -386,6 +382,22 @@
     <hint type="sourcelabel">
      <x>859</x>
      <y>879</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>themesgroupBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>actionload_themes</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>1136</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>

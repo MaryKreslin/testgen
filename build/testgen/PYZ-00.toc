@@ -767,7 +767,7 @@
    'C:\\Users\\maria\\AppData\\Roaming\\Python\\Python313\\site-packages\\lxml\\usedoctest.py',
    'PYMODULE'),
   ('lzma', 'C:\\Program Files\\Lib\\lzma.py', 'PYMODULE'),
-  ('mainform', 'D:\\Документы\\testgen2\\mainform.py', 'PYMODULE'),
+  ('mainform_', 'D:\\Документы\\testgen2\\mainform_.py', 'PYMODULE'),
   ('mimetypes', 'C:\\Program Files\\Lib\\mimetypes.py', 'PYMODULE'),
   ('multiprocessing',
    'C:\\Program Files\\Lib\\multiprocessing\\__init__.py',

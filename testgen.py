@@ -14,7 +14,7 @@ from docx.oxml.ns import qn
 #from docx.enum import WD_LIST_NUMBERING
 
 class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
-    
+   
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -22,10 +22,13 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.action_testgen.triggered.connect(self.gen)
         self.action_loadheader.triggered.connect(self.loadHeader)
         self.action_loadfooter.triggered.connect(self.loadFooter)
+        self.actionload_themes.triggered.connect(self.gen_themes)
         self.radioButton_1col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_1col))
         self.radioButton_2col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_2col))
         self.spinBox.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
         self.spinBox_2.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
+        self.question_count=0
+        self.list_cmb = []
 
     def read_docx_file(self, file_path):
         document = docx.Document(file_path)
@@ -59,13 +62,39 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             self.btn_testgen.setEnabled(False)
         else:
             self.btn_testgen.setEnabled(True)
+            self.question_count=self.spinBox_2.value()
+    
+    def gen_themes(self):
+        def update_temp(self):
+            temp = cmb.currentText()
+            print(f"Новое значение переменной temp: {temp}")
+
+        form_layout = QtWidgets.QFormLayout()
+        self.themesgroupBox.setLayout(form_layout)
+        #global list_cmb
+        #list_cmb = []
+        for i in range(self.question_count):
+            cmb = QtWidgets.QComboBox()
+            cmb.addItems(themes_set)
+            self.list_cmb.append(cmb)
+            cmb.currentTextChanged.connect(update_temp)
+            form_layout.addRow(f'Вопрос №{i+1}', cmb)
     
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
         if file_path:
             df = pd.read_excel(file_path)
-            global dict_list 
+            global dict_list
+            global themes_set 
+            themes_list = []
             dict_list= df.to_dict(orient='records')
+            for i in range( len(dict_list)):
+                value =  dict_list[i].get('Тема')
+                themes_list.append(value)
+            themes_set  = set(themes_list) 
+            global keys_list
+            keys_list = list(dict_list[0].keys())
+           
             table = self.tableWidget
             global row_count
             global column_count
@@ -75,16 +104,10 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             table.setRowCount(row_count)
            
             table.setHorizontalHeaderLabels((list(dict_list[0].keys())))
-            table.setColumnWidth(0, 200)
-            table.setColumnWidth(1, 600)
-            table.setColumnWidth(2, 200)
-            table.setColumnWidth(3, 200)
-            table.setColumnWidth(4, 200)
-            table.setColumnWidth(5, 200)
-            table.setColumnWidth(6, 200)
-            
+                       
             for row in range(row_count): 
                 for column in range(column_count):
+                    table.setColumnWidth(column, 300)
                     item = list(dict_list[row].values())[column]
                     if ( pd.isna(item)):
                         item = ''
@@ -171,9 +194,10 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             style_main.paragraph_format.algnment = WD_ALIGN_PARAGRAPH.JUSTIFY
             #_______________________________
             test_count = self.spinBox.value()
-            question_count = self.spinBox_2.value()
+            
+            self.question_count = self.spinBox_2.value()
             list_keys= []
-            if (test_count != 0 and question_count != 0):
+            if (test_count != 0 and self.question_count != 0):
                 
                 for test in range(test_count):
                     self.add_header_section( doc, test, styleH)
@@ -187,21 +211,55 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     cols.set(qn('w:space'), '10')  
 
                     list_ques = []
-                    for ques in range(question_count):
-                        n = random.randint(1, row_count-1)
-                        ques_text = doc.add_paragraph('Вопрос №' + str(ques+1), style=style_main)
-                        ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    ready_list = []
+                    #вычленяем из словаря только тема-вопрос-ответы-номер_прав
+                    dict2 = {}
+                    keys = ['Тема', 'Вопрос', 'Ответ1', 'Ответ2', 'Ответ3','Ответ4', 'Номер правильного']
+                    for i in range( len(dict_list)):
+                        dict1 = dict_list[i]
+                        for key in keys:
+                            dict2[key] =  dict1[key]
+                        ready_list.append(dict2)
+                    #print(ready_list)
 
-                        item = list(dict_list[n].values())
+                    if not(self.themesgroupBox.isChecked()):
+                        for ques in range(self.question_count):
+                            n = random.randint(1, row_count-1)
+                            ques_text = doc.add_paragraph('Вопрос №' + str(ques+1), style=style_main)
+                            ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+                            item = list(ready_list[n].values())
+                            #print(item)
                         
-                        doc.add_paragraph(item[1], style=style_main)
-                        for i in range(2,6):
-                            if (pd.isna(item[i]) != True):
-                                par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
+                            doc.add_paragraph(item[1], style=style_main)
+                            for i in range(2,6):
+                                if (pd.isna(item[i]) != True):
+                                    par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
                                                         
-                        list_ques.insert(ques, item[6])
+                            list_ques.insert(ques, item[6])
                         
-                        doc.add_paragraph('________________________________')
+                            doc.add_paragraph('________________________________')
+                    else:
+                        print(self.list_cmb[0].currentText(), self.list_cmb[1].currentText(), self.list_cmb[2].currentText())
+                        #генерим по темам
+                        for ques in range(self.question_count):
+                            theme = self.list_cmb[ques].currentText()
+                            print(ques, theme)
+                            n = random.randint(1, row_count-1)
+                            ques_text = doc.add_paragraph('Вопрос №' + str(ques+1), style=style_main)
+                            ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+                            item = list(ready_list[n].values())
+                            #print(item)
+                        
+                            doc.add_paragraph(item[1], style=style_main)
+                            for i in range(2,6):
+                                if (pd.isna(item[i]) != True):
+                                    par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
+                                                        
+                            list_ques.insert(ques, item[6])
+                        
+                            doc.add_paragraph('________________________________')
 
                     self.add_footer_section(doc)
                     #doc.add_section(WD_SECTION.NEW_PAGE)
@@ -209,9 +267,9 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     list_keys.insert(test, list_ques)
                     #doc.add_page_break()
                 # Добавление таблицы
-                self.add_keys_table(doc, question_count, list_keys)
+                self.add_keys_table(doc, self.question_count, list_keys)
                 
-            elif (test_count == 0 or question_count == 0):
+            elif (test_count == 0 or self.question_count == 0):
                 self.btn_testgen.setEnabled(False)     
                                                         
             doc.save(outfile_path)
