@@ -256,7 +256,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                         
                         #генерим по темам
                         #self.update_themes()
-                        print(self.themes)
+                        #print(self.themes)
                         for ques in range(self.question_count):
                             current_theme = self.themes[ques]
                             new_list = list(filter(lambda fil: fil['Тема'] == current_theme, ready_list))
