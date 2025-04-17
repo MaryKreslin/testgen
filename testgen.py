@@ -27,8 +27,10 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.radioButton_2col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_2col))
         self.spinBox.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
         self.spinBox_2.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
+        
         self.question_count=0
         self.list_cmb = []
+        self.themes = []
 
     def read_docx_file(self, file_path):
         document = docx.Document(file_path)
@@ -64,21 +66,32 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             self.btn_testgen.setEnabled(True)
             self.question_count=self.spinBox_2.value()
     
-    def gen_themes(self):
-        def update_temp(self):
-            temp = cmb.currentText()
-            print(f"Новое значение переменной temp: {temp}")
+    def update_combo(self, index):
+        sender_combo = self.sender()  # Получаем объект, вызвавший событие
+        new_text = sender_combo.currentText()
+        name = sender_combo.objectName()
+        for i, cmb in enumerate(self.list_cmb):
+            if cmb.objectName() == name:
+                self.themes[i] = new_text
+                break
+        
 
-        form_layout = QtWidgets.QFormLayout()
+    def gen_themes(self):
+        form_layout = QtWidgets.QFormLayout(self)
         self.themesgroupBox.setLayout(form_layout)
-        #global list_cmb
-        #list_cmb = []
+        self.list_cmb= []
+        self.themes =[]
         for i in range(self.question_count):
             cmb = QtWidgets.QComboBox()
             cmb.addItems(themes_set)
+            cmb.setObjectName(f"cmb_{i}")
             self.list_cmb.append(cmb)
-            cmb.currentTextChanged.connect(update_temp)
+            self.themes.append(cmb.currentText())
             form_layout.addRow(f'Вопрос №{i+1}', cmb)
+        # Подключаем сигнал currentIndexChanged ко всей группе элементов
+        print(self.list_cmb)
+        for combo in self.list_cmb:
+            combo.currentIndexChanged.connect(self.update_combo)
     
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
@@ -240,18 +253,20 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                         
                             doc.add_paragraph('________________________________')
                     else:
-                        print(self.list_cmb[0].currentText(), self.list_cmb[1].currentText(), self.list_cmb[2].currentText())
+                        
                         #генерим по темам
+                        #self.update_themes()
+                        print(self.themes)
                         for ques in range(self.question_count):
-                            theme = self.list_cmb[ques].currentText()
-                            print(ques, theme)
-                            n = random.randint(1, row_count-1)
+                            current_theme = self.themes[ques]
+                            new_list = list(filter(lambda fil: fil['Тема'] == current_theme, ready_list))
+                                                        
+                            n = random.randint(1, len(new_list)-1)
                             ques_text = doc.add_paragraph('Вопрос №' + str(ques+1), style=style_main)
                             ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-                            item = list(ready_list[n].values())
-                            #print(item)
-                        
+                            item = list(new_list[n].values())
+                                                    
                             doc.add_paragraph(item[1], style=style_main)
                             for i in range(2,6):
                                 if (pd.isna(item[i]) != True):
@@ -260,6 +275,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                             list_ques.insert(ques, item[6])
                         
                             doc.add_paragraph('________________________________')
+                            
 
                     self.add_footer_section(doc)
                     #doc.add_section(WD_SECTION.NEW_PAGE)
