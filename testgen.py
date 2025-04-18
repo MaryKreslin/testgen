@@ -22,12 +22,14 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.action_testgen.triggered.connect(self.gen)
         self.action_loadheader.triggered.connect(self.loadHeader)
         self.action_loadfooter.triggered.connect(self.loadFooter)
+        self.actionupdate_list.triggered.connect(self.update_combolist)
         self.actionload_themes.triggered.connect(self.gen_themes)
         self.radioButton_1col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_1col))
         self.radioButton_2col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_2col))
         self.spinBox.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
+        #self.spinBox_2.valueChanged.connect(self.update_list_cmb)
         self.spinBox_2.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
-        
+        self.form_layout = QtWidgets.QFormLayout()       
         self.question_count=0
         self.list_cmb = []
         self.themes = []
@@ -65,8 +67,34 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         else:
             self.btn_testgen.setEnabled(True)
             self.question_count=self.spinBox_2.value()
+            
+    def update_combolist(self):
+        #нужно очистить layout
+        self.clear_form_layout()
+        self.append_combos()
     
-    def update_combo(self, index):
+    def clear_form_layout(self):
+        while self.form_layout.rowCount():
+        # Получаем последнюю строку и её виджеты
+            row_index = self.form_layout.rowCount() - 1
+            label_item = self.form_layout.itemAt(row_index, QtWidgets.QFormLayout.LabelRole)
+            field_item = self.form_layout.itemAt(row_index, QtWidgets.QFormLayout.FieldRole)
+
+            if label_item is not None:
+            # Убираем ссылку родителя у каждого виджета
+                label_widget = label_item.widget()
+                if label_widget is not None:
+                    label_widget.deleteLater()
+
+            if field_item is not None:
+                field_widget = field_item.widget()
+                if field_widget is not None:
+                    field_widget.deleteLater()
+
+        # Удаляем саму строку из макета
+            self.form_layout.removeRow(row_index)
+
+    def update_combo(self, index):#формирование списка тем из комбо
         sender_combo = self.sender()  # Получаем объект, вызвавший событие
         new_text = sender_combo.currentText()
         name = sender_combo.objectName()
@@ -74,25 +102,28 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             if cmb.objectName() == name:
                 self.themes[i] = new_text
                 break
-        
-
-    def gen_themes(self):
-        form_layout = QtWidgets.QFormLayout(self)
-        self.themesgroupBox.setLayout(form_layout)
+    
+    def append_combos(self):
         self.list_cmb= []
         self.themes =[]
         for i in range(self.question_count):
             cmb = QtWidgets.QComboBox()
+            cmb.setFixedSize(250,50)
             cmb.addItems(themes_set)
             cmb.setObjectName(f"cmb_{i}")
             self.list_cmb.append(cmb)
             self.themes.append(cmb.currentText())
-            form_layout.addRow(f'Вопрос №{i+1}', cmb)
-        # Подключаем сигнал currentIndexChanged ко всей группе элементов
-        print(self.list_cmb)
+            self.form_layout.addRow(f'Вопрос №{i+1}', cmb)
+            
         for combo in self.list_cmb:
             combo.currentIndexChanged.connect(self.update_combo)
-    
+
+    def gen_themes(self):
+        self.form_layout.setVerticalSpacing(5)
+        self.append_combos()
+      
+        self.themesgroupBox.setLayout(self.form_layout)
+                   
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
         if file_path:
@@ -184,6 +215,21 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                 cells[col].text = str(list_keys[row][col-1])
 
     def gen(self):
+        def gen_ques(new_list):
+            n = random.randint(1, len(new_list)-1)
+            ques_text = doc.add_paragraph(f'Вопрос №{str(ques+1)}', style=style_main)
+            ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            item = list(new_list[n].values())
+                                                    
+            doc.add_paragraph(item[1], style=style_main)
+            for i in range(2,6):
+                if (pd.isna(item[i]) != True):
+                    par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
+                                                        
+            list_ques.insert(ques, item[6])
+                        
+            doc.add_paragraph('________________________________')
+        
         LEFT_INDENT = Pt(36)
         outfile_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*)")
               
@@ -226,57 +272,28 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     list_ques = []
                     ready_list = []
                     #вычленяем из словаря только тема-вопрос-ответы-номер_прав
-                    dict2 = {}
-                    keys = ['Тема', 'Вопрос', 'Ответ1', 'Ответ2', 'Ответ3','Ответ4', 'Номер правильного']
-                    for i in range( len(dict_list)):
-                        dict1 = dict_list[i]
+                   
+                    keys = ['Тема', 'Вопрос', 'Ответ1', 'Ответ2', 'Ответ3', 'Ответ4', 'Номер правильного']
+                    ready_list = []
+                    for dict1 in dict_list:
+                        dict2 = {}  # Создаем новый словарь на каждой итерации
                         for key in keys:
-                            dict2[key] =  dict1[key]
+                            dict2[key] = dict1.get(key)  # Используем метод get(), чтобы избежать ошибок, если ключа нет
                         ready_list.append(dict2)
                     #print(ready_list)
 
                     if not(self.themesgroupBox.isChecked()):
                         for ques in range(self.question_count):
-                            n = random.randint(1, row_count-1)
-                            ques_text = doc.add_paragraph('Вопрос №' + str(ques+1), style=style_main)
-                            ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-                            item = list(ready_list[n].values())
-                            #print(item)
-                        
-                            doc.add_paragraph(item[1], style=style_main)
-                            for i in range(2,6):
-                                if (pd.isna(item[i]) != True):
-                                    par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
-                                                        
-                            list_ques.insert(ques, item[6])
-                        
-                            doc.add_paragraph('________________________________')
+                           gen_ques(ready_list) 
                     else:
-                        
-                        #генерим по темам
-                        #self.update_themes()
-                        #print(self.themes)
+                    #генерим по темам
                         for ques in range(self.question_count):
                             current_theme = self.themes[ques]
-                            new_list = list(filter(lambda fil: fil['Тема'] == current_theme, ready_list))
-                                                        
-                            n = random.randint(1, len(new_list)-1)
-                            ques_text = doc.add_paragraph('Вопрос №' + str(ques+1), style=style_main)
-                            ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-                            item = list(new_list[n].values())
-                                                    
-                            doc.add_paragraph(item[1], style=style_main)
-                            for i in range(2,6):
-                                if (pd.isna(item[i]) != True):
-                                    par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
-                                                        
-                            list_ques.insert(ques, item[6])
-                        
-                            doc.add_paragraph('________________________________')
                             
-
+                            # Проверка наличия нужной темы среди ключей
+                            new_list = list(filter(lambda x: x['Тема'] == current_theme, ready_list))
+                            gen_ques(new_list)
+                            
                     self.add_footer_section(doc)
                     #doc.add_section(WD_SECTION.NEW_PAGE)
 

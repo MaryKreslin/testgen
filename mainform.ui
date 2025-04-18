@@ -51,8 +51,8 @@
    <widget class="QPushButton" name="btn_testgen">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>1330</y>
+      <x>630</x>
+      <y>1280</y>
       <width>330</width>
       <height>100</height>
      </rect>
@@ -69,7 +69,7 @@
    <widget class="QSpinBox" name="spinBox">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>510</x>
       <y>560</y>
       <width>100</width>
       <height>100</height>
@@ -120,7 +120,7 @@
    <widget class="QSpinBox" name="spinBox_2">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>510</x>
       <y>660</y>
       <width>100</width>
       <height>100</height>
@@ -196,6 +196,9 @@
     <property name="checkable">
      <bool>true</bool>
     </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
     <widget class="QTextBrowser" name="textBrowser">
      <property name="geometry">
       <rect>
@@ -245,6 +248,9 @@
     <property name="checkable">
      <bool>true</bool>
     </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
     <widget class="QTextBrowser" name="textBrowser_2">
      <property name="geometry">
       <rect>
@@ -269,20 +275,99 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="themesgroupBox">
+   <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>990</y>
-      <width>301</width>
-      <height>251</height>
+      <y>980</y>
+      <width>600</width>
+      <height>500</height>
      </rect>
     </property>
-    <property name="title">
-     <string>Разбивка по темам</string>
+    <property name="maximumSize">
+     <size>
+      <width>600</width>
+      <height>500</height>
+     </size>
     </property>
-    <property name="checkable">
+    <property name="baseSize">
+     <size>
+      <width>600</width>
+      <height>340</height>
+     </size>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
+    <property name="sizeAdjustPolicy">
+     <enum>QAbstractScrollArea::AdjustToContents</enum>
+    </property>
+    <property name="widgetResizable">
      <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>584</width>
+       <height>498</height>
+      </rect>
+     </property>
+     <widget class="QGroupBox" name="themesgroupBox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>580</width>
+        <height>491</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>580</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="title">
+       <string>Разбивка по темам</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="update_list">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>1490</y>
+      <width>591</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Обновить</string>
     </property>
    </widget>
   </widget>
@@ -320,6 +405,11 @@
   <action name="actionload_themes">
    <property name="text">
     <string>load_themes</string>
+   </property>
+  </action>
+  <action name="actionupdate_list">
+   <property name="text">
+    <string>update_list</string>
    </property>
   </action>
  </widget>
@@ -398,6 +488,22 @@
     <hint type="sourcelabel">
      <x>160</x>
      <y>1136</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>update_list</sender>
+   <signal>clicked()</signal>
+   <receiver>actionupdate_list</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>305</x>
+     <y>1541</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>
