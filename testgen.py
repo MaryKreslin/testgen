@@ -27,12 +27,14 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.radioButton_1col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_1col))
         self.radioButton_2col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_2col))
         self.spinBox.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
-        #self.spinBox_2.valueChanged.connect(self.update_list_cmb)
         self.spinBox_2.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
         self.form_layout = QtWidgets.QFormLayout()       
         self.question_count=0
         self.list_cmb = []
         self.themes = []
+        self.header_content=''
+        self.footer_content= ''
+        self.text_col = 1
 
     def read_docx_file(self, file_path):
         document = docx.Document(file_path)
@@ -43,24 +45,21 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
 
     def loadHeader(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
-        global header_content
         if file_path:
-            header_content = self.read_docx_file(file_path)
-            self.textBrowser.setText(header_content)
+            self.header_content = self.read_docx_file(file_path)
+            self.textBrowser.setText(self.header_content)
     
     def loadFooter(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
-        global footer_content
         if file_path:
-            footer_content = self.read_docx_file(file_path)
-            self.textBrowser_2.setText(footer_content)
+            self.footer_content = self.read_docx_file(file_path)
+            self.textBrowser_2.setText(self.footer_content)
 
     def on_radio_button_clicked(self, rbtn):
-        global text_col #количество колонок в тесте
+        #global text_col #количество колонок в тесте
         if rbtn.isChecked():
-            text_col = int(rbtn.text())
-            
-
+            self.text_col = int(rbtn.text())
+    
     def checkValue(self, spin1, spin2):
         if (spin1.value() == 0 or spin2.value() == 0):
             self.btn_testgen.setEnabled(False)
@@ -169,13 +168,13 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         cols.set(qn('w:num'), '1')
         
         if self.headergroup.isChecked():
-            head = doc.add_paragraph(header_content, style = style)
-        head=doc.add_paragraph('Вариант '+str(test+1), style = style)
+            if self.header_content.strip() !='' :
+                head = doc.add_paragraph(self.header_content, style = style)
+            else:
+                 QtWidgets.QMessageBox.critical(self, 'Error', f'Поле заголовка пустое!', QtWidgets.QMessageBox.Yes)
+                 return 
+            head=doc.add_paragraph('Вариант '+str(test+1), style = style)
         
-    def add_main_section(self, doc, style, test):
-        LEFT_INDENT = Pt(36)
-        
-
     def add_footer_section(self, doc):
         style = doc.styles['Normal']
         style.font.name = 'Arial'
@@ -186,11 +185,13 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'), '1')
         if self.footergroup.isChecked():
-            foot = doc.add_paragraph(footer_content).style = style
-            #foot.style = style
+            if self.footer_content.strip()!= '':
+                foot = doc.add_paragraph(self.footer_content).style = style
+            else:
+                QtWidgets.QMessageBox.critical(self, 'Error', f'Поле футера пустое!', QtWidgets.QMessageBox.Yes)
+                return
         doc.add_section(WD_SECTION.NEW_PAGE)
-        #doc.add_page_break()
-
+        
     def add_keys_table(self, doc, question_count, list_keys):
         # добавляем таблицу с одной строкой для заполнения названий колонок
         table = doc.add_table(1, question_count+1)
@@ -232,8 +233,8 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         
         LEFT_INDENT = Pt(36)
         outfile_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*)")
-              
-        if outfile_path:
+        try:      
+        #if outfile_path:
             doc = docx.Document()
             # задаем стиль текста по умолчанию
             style = doc.styles['Normal']
@@ -266,7 +267,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     section1 = doc.sections[-1]
                     sectPr = section1._sectPr
                     cols = sectPr.xpath('./w:cols')[0]
-                    cols.set(qn('w:num'), str(text_col))
+                    cols.set(qn('w:num'), str(self.text_col))
                     cols.set(qn('w:space'), '10')  
 
                     list_ques = []
@@ -310,7 +311,9 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             doc.styles['mainStyle'].delete()
             
             QtWidgets.QMessageBox.information(self, 'Information', 'Файл сформирован', QtWidgets.QMessageBox.Yes)
-        else: QtWidgets.QMessageBox.critical(self, 'Error', 'Ошибка чтения файла', QtWidgets.QMessageBox.Yes)
+        #else: 
+        except OSError as err:
+            QtWidgets.QMessageBox.critical(self, 'Error', f'Ошибка записи в файл:  {err}', QtWidgets.QMessageBox.Yes)
      
 def main():
     app = QtWidgets.QApplication(sys.argv) 

@@ -68,6 +68,7 @@ class Ui_MainWindow(object):
         self.radioButton_1col = QtWidgets.QRadioButton(self.groupBox_col)
         self.radioButton_1col.setGeometry(QtCore.QRect(20, 40, 250, 30))
         self.radioButton_1col.setObjectName("radioButton_1col")
+        self.radioButton_1col.setChecked(True)
         self.radioButton_2col = QtWidgets.QRadioButton(self.groupBox_col)
         self.radioButton_2col.setGeometry(QtCore.QRect(20, 100, 250, 30))
         self.radioButton_2col.setObjectName("radioButton_2col")
@@ -191,6 +192,11 @@ class Ui_MainWindow(object):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
+    icon_path = 'logo.png'
+    app_icon = QtWidgets.QIcon(icon_path)
+    
+    # Установка иконки приложению
+    app.setWindowIcon(app_icon)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)

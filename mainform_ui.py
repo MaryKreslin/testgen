@@ -16,6 +16,8 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(2000, 1600)
         MainWindow.setBaseSize(QtCore.QSize(2000, 800))
+        icon = QtGui.QIcon.fromTheme("mail-signed")
+        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
