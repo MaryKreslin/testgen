@@ -191,14 +191,23 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
+
+    from PyQt5.QtWinExtras import QtWin 
+    myappid = 'mycompany.myproduct.subproduct.version'                         
+    QtWin.setCurrentProcessExplicitAppUserModelID(myappid) 
+
     app = QtWidgets.QApplication(sys.argv)
-    icon_path = 'logo.png'
-    app_icon = QtWidgets.QIcon(icon_path)
+    #icon_path = 'logo.png'
+    #app_icon = QtWidgets.QIcon(icon_path)
     
     # Установка иконки приложению
-    app.setWindowIcon(app_icon)
+    
+    app.setWindowIcon(QtGui.QIcon('logo.png'))
     MainWindow = QtWidgets.QMainWindow()
+    #MainWindow = QtWidgets.QWidget()
+    MainWindow.setWindowIcon(QtGui.QIcon('logo.png'))
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+
