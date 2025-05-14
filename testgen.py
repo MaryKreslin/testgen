@@ -1,9 +1,10 @@
 import docx
 from docx.shared import Pt
-import docx.styles
+#import docx.styles
 import pandas as pd
-import sys  
-from PyQt5 import QtWidgets
+import sys 
+import os 
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
 import mainform_
 import random
@@ -18,6 +19,8 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        icon_path = resource_path("logo.png")
+        self.setWindowIcon(QtGui.QIcon(icon_path))
         self.action_load_file.triggered.connect(self.open_file_dialog)
         self.action_testgen.triggered.connect(self.gen)
         self.action_loadheader.triggered.connect(self.loadHeader)
@@ -314,9 +317,25 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         #else: 
         except OSError as err:
             QtWidgets.QMessageBox.critical(self, 'Error', f'Ошибка записи в файл:  {err}', QtWidgets.QMessageBox.Yes)
+
+def resource_path(relative_path):
+    #"""Получить абсолютный путь к ресурсу, работает для разработки и PyInstaller"""
+    try:
+        # PyInstaller создает временную папку и сохраняет путь в _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        # Если это не PyInstaller, используем текущую папку
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
      
 def main():
-    app = QtWidgets.QApplication(sys.argv) 
+    from PyQt5.QtWinExtras import QtWin 
+    myappid = 'mycompany.myproduct.subproduct.version'                         
+    QtWin.setCurrentProcessExplicitAppUserModelID(myappid) 
+    icon_path = resource_path("logo.png")
+    app = QtWidgets.QApplication(sys.argv)
+    #app.setWindowIcon(QtGui.QIcon(icon_path))
+     
     window = testgen()  
     window.show() 
     app.exec_() 

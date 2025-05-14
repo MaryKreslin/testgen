@@ -9,13 +9,28 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+import sys, os
 
 class Ui_MainWindow(object):
+    def resource_path(self,relative_path):
+    #"""Получить абсолютный путь к ресурсу, работает для разработки и PyInstaller"""
+        try:
+        # PyInstaller создает временную папку и сохраняет путь в _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+        # Если это не PyInstaller, используем текущую папку
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
+    
+    def setmyIcon(self, MainWindow):
+        icon_path = self.resource_path("logo.png")
+        MainWindow.setWindowIcon(QtGui.QIcon(icon_path))
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(2000, 1600)
         MainWindow.setBaseSize(QtCore.QSize(2000, 800))
+        #self.setmyIcon(MainWindow)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
@@ -188,26 +203,26 @@ class Ui_MainWindow(object):
         self.actionload_themes.setText(_translate("MainWindow", "load_themes"))
         self.actionupdate_list.setText(_translate("MainWindow", "update_list"))
 
+def resource_path(relative_path):
+    #"""Получить абсолютный путь к ресурсу, работает для разработки и PyInstaller"""
+        try:
+        # PyInstaller создает временную папку и сохраняет путь в _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+        # Если это не PyInstaller, используем текущую папку
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
 
 if __name__ == "__main__":
-    import sys
-
-    from PyQt5.QtWinExtras import QtWin 
-    myappid = 'mycompany.myproduct.subproduct.version'                         
-    QtWin.setCurrentProcessExplicitAppUserModelID(myappid) 
-
+    
+   
     app = QtWidgets.QApplication(sys.argv)
-    #icon_path = 'logo.png'
-    #app_icon = QtWidgets.QIcon(icon_path)
-    
-    # Установка иконки приложению
-    
-    app.setWindowIcon(QtGui.QIcon('logo.png'))
     MainWindow = QtWidgets.QMainWindow()
-    #MainWindow = QtWidgets.QWidget()
-    MainWindow.setWindowIcon(QtGui.QIcon('logo.png'))
+    #icon_path = resource_path("logo.png")
+    #MainWindow.setWindowIcon(QtGui.QIcon(icon_path))
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
+    #ui.setIcon(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
 
