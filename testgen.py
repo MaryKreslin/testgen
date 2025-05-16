@@ -5,6 +5,8 @@ import pandas as pd
 import sys 
 import os 
 from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
 import mainform_
 import random
@@ -31,7 +33,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.radioButton_2col.toggled.connect(lambda: self.on_radio_button_clicked(self.radioButton_2col))
         self.spinBox.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
         self.spinBox_2.valueChanged.connect(lambda: self.checkValue(self.spinBox, self.spinBox_2))
-        self.form_layout = QtWidgets.QFormLayout()       
+        #self.form_layout = QtWidgets.QFormLayout()       
         self.question_count=0
         self.list_cmb = []
         self.themes = []
@@ -121,10 +123,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             combo.currentIndexChanged.connect(self.update_combo)
 
     def gen_themes(self):
-        self.form_layout.setVerticalSpacing(5)
         self.append_combos()
-      
-        self.themesgroupBox.setLayout(self.form_layout)
                    
     def open_file_dialog(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
