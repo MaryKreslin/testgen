@@ -40,38 +40,42 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.header_content=''
         self.footer_content= ''
         self.text_col = 1
-
+    #считывание .docx файла 
     def read_docx_file(self, file_path):
         document = docx.Document(file_path)
         text = []
         for paragraph in document.paragraphs:
             text.append(paragraph.text)
         return '\n'.join(text)
-
+    
+    #загрузка шапки
     def loadHeader(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
         if file_path:
             self.header_content = self.read_docx_file(file_path)
             self.textBrowser.setText(self.header_content)
     
+    #загрузка футера
     def loadFooter(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
         if file_path:
             self.footer_content = self.read_docx_file(file_path)
             self.textBrowser_2.setText(self.footer_content)
 
+    #количество колонок в тесте
     def on_radio_button_clicked(self, rbtn):
-        #global text_col #количество колонок в тесте
         if rbtn.isChecked():
             self.text_col = int(rbtn.text())
     
+    #доступность кнопки генерации
     def checkValue(self, spin1, spin2):
         if (spin1.value() == 0 or spin2.value() == 0):
             self.btn_testgen.setEnabled(False)
         else:
             self.btn_testgen.setEnabled(True)
             self.question_count=self.spinBox_2.value()
-            
+    
+    #обновление  поля разбивки по темам        
     def update_combolist(self):
         #нужно очистить layout
         self.clear_form_layout()
@@ -97,7 +101,8 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
 
         # Удаляем саму строку из макета
             self.form_layout.removeRow(row_index)
-
+    
+    #обновление тем в комбо
     def update_combo(self, index):#формирование списка тем из комбо
         sender_combo = self.sender()  # Получаем объект, вызвавший событие
         new_text = sender_combo.currentText()
@@ -107,12 +112,13 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                 self.themes[i] = new_text
                 break
     
+    #добавление комбо в список
     def append_combos(self):
         self.list_cmb= []
         self.themes =[]
         for i in range(self.question_count):
             cmb = QtWidgets.QComboBox()
-            cmb.setFixedSize(250,50)
+            cmb.setFixedSize(360,80)
             cmb.addItems(themes_set)
             cmb.setObjectName(f"cmb_{i}")
             self.list_cmb.append(cmb)
@@ -160,7 +166,8 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     
         else:
             QtWidgets.QMessageBox.critical(self, 'Error', 'Ошибка чтения файла', QtWidgets.QMessageBox.Yes)
-
+    
+    #добавление в тест шапки
     def add_header_section(self, doc, test, style):
         sectionH = doc.sections[0]
         
@@ -176,7 +183,8 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                  QtWidgets.QMessageBox.critical(self, 'Error', f'Поле заголовка пустое!', QtWidgets.QMessageBox.Yes)
                  return 
             head=doc.add_paragraph('Вариант '+str(test+1), style = style)
-        
+
+    #добавление в тест футера    
     def add_footer_section(self, doc):
         style = doc.styles['Normal']
         style.font.name = 'Arial'
@@ -193,7 +201,8 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                 QtWidgets.QMessageBox.critical(self, 'Error', f'Поле футера пустое!', QtWidgets.QMessageBox.Yes)
                 return
         doc.add_section(WD_SECTION.NEW_PAGE)
-        
+
+    #добавление таблицы ключей в файл    
     def add_keys_table(self, doc, question_count, list_keys):
         # добавляем таблицу с одной строкой для заполнения названий колонок
         table = doc.add_table(1, question_count+1)
@@ -217,17 +226,18 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             for col in range(1,len(list_keys[row])+1):
                 cells[col].text = str(list_keys[row][col-1])
 
+    #генерация тестов
     def gen(self):
         def gen_ques(new_list):
             n = random.randint(1, len(new_list)-1)
             ques_text = doc.add_paragraph(f'Вопрос №{str(ques+1)}', style=style_main)
             ques_text.alignment = WD_ALIGN_PARAGRAPH.CENTER
             item = list(new_list[n].values())
-                                                    
+           # print(item)                                        
             doc.add_paragraph(item[1], style=style_main)
             for i in range(2,6):
                 if (pd.isna(item[i]) != True):
-                    par =doc.add_paragraph(f'{i-1}. '+ item[i], style=style_main)
+                    par =doc.add_paragraph(f'{i-1}. '+str(item[i]), style=style_main)
                                                         
             list_ques.insert(ques, item[6])
                         
