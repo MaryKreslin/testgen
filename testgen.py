@@ -4,19 +4,21 @@ from docx.shared import Pt
 import pandas as pd
 import sys 
 import os 
-from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QSizePolicy
-from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets, QtGui, QtCore
+#from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
-import mainform_
+import mainform_new
 import random
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 #from docx.enum import WD_LIST_NUMBERING
+from PyQt5.QtGui import *
+import math
 
-class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
+class testgen(QtWidgets.QMainWindow, mainform_new.Ui_MainWindow):
    
     def __init__(self):
         super().__init__()
@@ -50,17 +52,30 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
     
     #загрузка шапки
     def loadHeader(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Word files (*.docx)")
         if file_path:
-            self.header_content = self.read_docx_file(file_path)
-            self.textBrowser.setText(self.header_content)
+            try:
+                self.header_content = self.read_docx_file(file_path)
+                self.plainTextEdit_header.setPlainText(self.header_content)
+            except Exception as e:
+                self.dialog_critical(str(e))
     
     #загрузка футера
     def loadFooter(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Word Files (*.docx)")
         if file_path:
-            self.footer_content = self.read_docx_file(file_path)
-            self.textBrowser_2.setText(self.footer_content)
+            try:
+                self.footer_content = self.read_docx_file(file_path)
+                self.plainTextEdit_footer.setPlainText(self.footer_content)
+                
+            except Exception as e:
+                self.dialog_critical(str(e))
+    
+    def dialog_critical(self, s):
+        dlg = QtWidgets.QMessageBox(self)
+        dlg.setText(s)
+        dlg.setIcon(QtWidgets.QMessageBox.Critical)
+        dlg.show()
 
     #количество колонок в тесте
     def on_radio_button_clicked(self, rbtn):
@@ -82,11 +97,11 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.append_combos()
     
     def clear_form_layout(self):
-        while self.form_layout.rowCount():
+        while self.formLayout.rowCount():
         # Получаем последнюю строку и её виджеты
-            row_index = self.form_layout.rowCount() - 1
-            label_item = self.form_layout.itemAt(row_index, QtWidgets.QFormLayout.LabelRole)
-            field_item = self.form_layout.itemAt(row_index, QtWidgets.QFormLayout.FieldRole)
+            row_index = self.formLayout.rowCount() - 1
+            label_item = self.formLayout.itemAt(row_index, QtWidgets.QFormLayout.LabelRole)
+            field_item = self.formLayout.itemAt(row_index, QtWidgets.QFormLayout.FieldRole)
 
             if label_item is not None:
             # Убираем ссылку родителя у каждого виджета
@@ -100,7 +115,7 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     field_widget.deleteLater()
 
         # Удаляем саму строку из макета
-            self.form_layout.removeRow(row_index)
+            self.formLayout.removeRow(row_index)
     
     #обновление тем в комбо
     def update_combo(self, index):#формирование списка тем из комбо
@@ -118,55 +133,87 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         self.themes =[]
         for i in range(self.question_count):
             cmb = QtWidgets.QComboBox()
-            cmb.setFixedSize(360,80)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy.setHeightForWidth(cmb.sizePolicy().hasHeightForWidth())
+            cmb.setSizePolicy(sizePolicy)
+            cmb.setMinimumSize(QtCore.QSize(300,70))
+            cmb.setMaximumSize(QtCore.QSize(16777215, 70))
+            font = QFont('Times', 12)
+            font.setBold(False)
+            font.setItalic(True)
+            cmb.setFont(font)
+
             cmb.addItems(themes_set)
             cmb.setObjectName(f"cmb_{i}")
             self.list_cmb.append(cmb)
             self.themes.append(cmb.currentText())
-            self.form_layout.addRow(f'Вопрос №{i+1}', cmb)
+            label = QtWidgets.QLabel()
+            label.setFont(font)
+            label.setText(f'Вопрос №{i+1}')
+            
+            self.formLayout.addRow(label, cmb)
             
         for combo in self.list_cmb:
             combo.currentIndexChanged.connect(self.update_combo)
 
     def gen_themes(self):
+        #self.clear_form_layout()
         self.append_combos()
+    
+    #удаление пустых
+    def del_nan(self, data):
+         filtered_data = {k: v for k, v in data.items() if not (isinstance(v, float) and math.isnan(v))}
+         return filtered_data
                    
     def open_file_dialog(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*)")
-        if file_path:
-            df = pd.read_excel(file_path)
-            global dict_list
-            global themes_set 
-            themes_list = []
-            dict_list= df.to_dict(orient='records')
-            for i in range( len(dict_list)):
-                value =  dict_list[i].get('Тема')
-                themes_list.append(value)
-            themes_set  = set(themes_list) 
-            global keys_list
-            keys_list = list(dict_list[0].keys())
+        try:
+            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Таблицы Excel (*.xlsx)")
+            if file_path:
+                df = pd.read_excel(file_path)
+                global dict_list
+                global themes_set 
+                themes_list = []
+                dict_list_temp=  df.to_dict(orient='records')
+            
+                dict_list = list(map(lambda x: self.convert_to_str(x), dict_list_temp))
            
-            table = self.tableWidget
-            global row_count
-            global column_count
-            row_count = (len(dict_list))
-            column_count = (len(dict_list[0]))
-            table.setColumnCount(column_count) 
-            table.setRowCount(row_count)
+                global keys_list
+                keys_list=list(dict_list[0].keys())
+            
+                for i in range( len(dict_list)):
+                    value =  dict_list[i].get(keys_list[0])
+                #if type(value) == str:
+                    themes_list.append(value)
+                #else:
+                #    values = str(value)
+                #    themes_list.append(values)
+                   
+                themes_set  = set(themes_list) 
+                   
+                table = self.tableWidget
+                global row_count
+                global column_count
+                row_count = (len(dict_list))
+                column_count = (len(dict_list[0]))
+                table.setColumnCount(column_count) 
+                table.setRowCount(row_count)
            
-            table.setHorizontalHeaderLabels((list(dict_list[0].keys())))
+                table.setHorizontalHeaderLabels((list(dict_list[0].keys())))
                        
-            for row in range(row_count): 
-                for column in range(column_count):
-                    table.setColumnWidth(column, 300)
-                    item = list(dict_list[row].values())[column]
-                    if ( pd.isna(item)):
-                        item = ''
-                    table.setItem(row, column, QTableWidgetItem(item))
+                for row in range(row_count): 
+                    for column in range(column_count):
+                        table.setColumnWidth(column, 300)
                     
-        else:
-            QtWidgets.QMessageBox.critical(self, 'Error', 'Ошибка чтения файла', QtWidgets.QMessageBox.Yes)
-    
+                        item = list(dict_list[row].values())[column]
+                        print(item)
+                        if ( pd.isna(item)):
+                            item = ''
+                        
+                        table.setItem(row, column, QTableWidgetItem(item))
+        except FileNotFoundError as e:            
+            QtWidgets.QMessageBox.critical(self, 'Error', f'Ошибка чтения файла: {e}', QtWidgets.QMessageBox.Yes)
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, 'Error', f'Ошибка: {e}', QtWidgets.QMessageBox.Yes)
     #добавление в тест шапки
     def add_header_section(self, doc, test, style):
         sectionH = doc.sections[0]
@@ -175,10 +222,10 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         sectPr = sectionH._sectPr 
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'), '1')
-        
+        content = self.plainTextEdit_header.toPlainText()
         if self.headergroup.isChecked():
             if self.header_content.strip() !='' :
-                head = doc.add_paragraph(self.header_content, style = style)
+                head = doc.add_paragraph(content, style = style)
             else:
                  QtWidgets.QMessageBox.critical(self, 'Error', f'Поле заголовка пустое!', QtWidgets.QMessageBox.Yes)
                  return 
@@ -194,9 +241,10 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
         sectPr = sectionf._sectPr
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'), '1')
+        content= self.plainTextEdit_footer.toPlainText()
         if self.footergroup.isChecked():
-            if self.footer_content.strip()!= '':
-                foot = doc.add_paragraph(self.footer_content).style = style
+            if content.strip()!= '':
+                foot = doc.add_paragraph(content).style = style
             else:
                 QtWidgets.QMessageBox.critical(self, 'Error', f'Поле футера пустое!', QtWidgets.QMessageBox.Yes)
                 return
@@ -226,6 +274,12 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
             for col in range(1,len(list_keys[row])+1):
                 cells[col].text = str(list_keys[row][col-1])
 
+    def convert_to_str(self, data):
+        for key, value in data.items():
+            if isinstance(value, (int, float)) and not math.isnan(value):
+                data[key] = str(value)
+        return data
+    
     #генерация тестов
     def gen(self):
         def gen_ques(new_list):
@@ -285,26 +339,31 @@ class testgen(QtWidgets.QMainWindow, mainform_.Ui_MainWindow):
                     list_ques = []
                     ready_list = []
                     #вычленяем из словаря только тема-вопрос-ответы-номер_прав
-                   
-                    keys = ['Тема', 'Вопрос', 'Ответ1', 'Ответ2', 'Ответ3', 'Ответ4', 'Номер правильного']
-                    ready_list = []
+                    # keys = ['Тема', 'Вопрос', 'Ответ1', 'Ответ2', 'Ответ3', 'Ответ4', 'Номер правильного']
+                    #ready_list = []
                     for dict1 in dict_list:
                         dict2 = {}  # Создаем новый словарь на каждой итерации
-                        for key in keys:
-                            dict2[key] = dict1.get(key)  # Используем метод get(), чтобы избежать ошибок, если ключа нет
+                        for key in keys_list:
+                            dict2[key] = dict1.get(key)
+                            #Используем метод get(), чтобы избежать ошибок, если ключа нет
                         ready_list.append(dict2)
                     #print(ready_list)
-
+                    
                     if not(self.themesgroupBox.isChecked()):
                         for ques in range(self.question_count):
-                           gen_ques(ready_list) 
+                           gen_ques(self.ready_list) 
                     else:
                     #генерим по темам
                         for ques in range(self.question_count):
                             current_theme = self.themes[ques]
-                            
+                            thema = keys_list[0]
+                            #temp_list =list(map( lambda x: self.convert_to_str(x, thema), ready_list))
+                            #print(temp_list)
                             # Проверка наличия нужной темы среди ключей
-                            new_list = list(filter(lambda x: x['Тема'] == current_theme, ready_list))
+                            #new_list = list(filter(lambda x: x['Тема'] == current_theme, ready_list))
+                            new_list = list(filter(lambda x: x[thema] == current_theme, ready_list))
+                             
+                                #print(new_list)
                             gen_ques(new_list)
                             
                     self.add_footer_section(doc)
