@@ -351,7 +351,7 @@ class testgen(QtWidgets.QMainWindow, mainform_new.Ui_MainWindow):
                     
                     if not(self.themesgroupBox.isChecked()):
                         for ques in range(self.question_count):
-                           gen_ques(self.ready_list) 
+                           gen_ques(ready_list) 
                     else:
                     #генерим по темам
                         for ques in range(self.question_count):
